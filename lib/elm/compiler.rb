@@ -5,9 +5,9 @@ require 'tempfile'
 module Elm
   class Compiler
     class << self
-      def compile(elm_files, output_path: nil, elm_path: nil, debug: false, optimize: false)
+      def compile(elm_files, output_path: nil, elm_path: nil, debug: false, optimize: true)
         elm_path ||= `which elm`.strip
-        fail ExecutableNotFound unless elm_executable_exists?(elm_path)
+        fail ExecutableNotFound if elm_path == 'elm not found'
 
         if output_path
           elm_make(elm_path, elm_files, output_path, debug, optimize)
@@ -17,13 +17,6 @@ module Elm
       end
 
       private
-
-      def elm_executable_exists?(elm_path)
-        Open3.capture2(elm_path)
-        true
-      rescue Errno::ENOENT, Errno::EACCES
-        false
-      end
 
       def compile_to_string(elm_path, elm_files, debug, optimize)
         Tempfile.open(['elm', '.js']) do |tempfile|
