@@ -7,11 +7,14 @@ module Elm
     class << self
       def compile(elm_files, output_path: nil, elm_path: nil, debug: false, optimize: true)
         elm_path ||= `which elm`.strip
+        puts "elm-compiler 1"
         fail ExecutableNotFound if elm_path == 'elm not found'
-
+        puts "elm-compiler 2"
         if output_path
+          puts "elm-compiler 3"
           elm_make(elm_path, elm_files, output_path, debug, optimize)
         else
+          puts "elm-compiler 4"
           compile_to_string(elm_path, elm_files, debug, optimize)
         end
       end
@@ -19,19 +22,25 @@ module Elm
       private
 
       def compile_to_string(elm_path, elm_files, debug, optimize)
-        Tempfile.open(['elm', '.js']) do |tempfile|
+        puts "elm-compiler 5"
+        t = Tempfile.open(['elm', '.js']) do |tempfile|
           elm_make(elm_path, elm_files, tempfile.path, debug, optimize)
           return File.read tempfile.path
         end
+        puts "elm-compiler 6"
+        t
       end
 
       def elm_make(elm_path, elm_files, output_path, debug, optimize)
         args = [{'LANG' => 'en_US.UTF8'}, elm_path, 'make', *elm_files, '--output', output_path]
         args << '--debug' if debug
         args << '--optimize' if optimize
-        Open3.popen3(*args) do |_stdin, _stdout, stderr, wait_thr|
+        puts "elm-compiler 7"
+        x = Open3.popen3(*args) do |_stdin, _stdout, stderr, wait_thr|
           fail CompileError, stderr.gets(nil) if wait_thr.value.exitstatus != 0
         end
+        puts "elm-compiler 8"
+        x
       end
     end
   end
